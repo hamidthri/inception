@@ -1,18 +1,26 @@
-# Use the Debian Buster base image
 FROM debian:buster
 
-# Set the working directory
-WORKDIR /mariadb
+# install maridb server
+RUN apt-get update && apt-get upgrade -y && apt-get install -y mariadb-server openssl
 
-# Update package lists and install MariaDB server
-RUN apt-get update && apt-get install -y mariadb-server && apt-get clean
+# copy the mariadb configuration file
+COPY ./tools/script.sh /mariadb/
 
-# Copy the script into the container
-COPY ./tools/script.sh /usr/local/bin/
-COPY ./conf/50-server.cnf /etc/mysql/my.cnf
+# Copy 50-server.cnf to /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 
-# Set execute permissions on the script
-RUN chmod +x /usr/local/bin/script.sh
+# Access rights
+RUN chmod +x /mariadb/script.sh
 
-# Specify the command to run the script
-CMD ["bash", "/usr/local/bin/script.sh"]
+# Expose port 3306
+EXPOSE 3306
+
+ENV DB_USER=wordpress_user \
+    DB_PASSWORD=wordpress_password \
+    DB_NAME=wordpress_db \
+    DB_ROOT_PASSWORD=root_password
+    
+# Run the script
+ENTRYPOINT ["/mariadb/script.sh"]
+
+CMD ["mysqld"]

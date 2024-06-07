@@ -1,39 +1,6 @@
 version: '3.7'
 
 services:
-  mariadb:
-    container_name: mariadb
-    image: mariadb:10.5
-    build: ./requirements/mariadb/
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - mariadb:/var/lib/mysql
-    networks:
-      - inception
-
-  wordpress:
-    healthcheck:
-      test: ["CMD", "curl", "-f", "https://wordpress/wp-admin/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    container_name: wordpress
-    image: wordpress
-    build: ./requirements/wordpress/
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - wordpress:/var/www/html
-    networks:
-      - inception
-    depends_on:
-      - mariadb
-
-
   nginx:
     container_name: nginx
     image: nginx:1.25.5
@@ -41,14 +8,53 @@ services:
     ports:
       - "443:443"
     restart: always
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     volumes:
       - wordpress:/var/www/html
     depends_on:
       - wordpress
     networks:
       - inception
+
+  wordpress:
+    container_name: wordpress
+    image: wordpress
+    build: ./requirements/wordpress/
+    restart: always
+    # env_file:
+    #   - .env
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: wp_password
+
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+
+  mariadb:
+    container_name: mariadb
+    image: mariadb:10.5
+    build: ./requirements/mariadb/
+    restart: always
+    # env_file:
+    #   - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: wp_password
+
+    volumes:
+      - mariadb:/var/lib/mysql
+    networks:
+      - inception
+
 
 volumes:
   mariadb:

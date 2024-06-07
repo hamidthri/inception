@@ -1,16 +1,22 @@
 #!/bin/bash
 
-# Start MariaDB service
+echo -e "Starting Mariadb service..."
 service mysql start
 
-# Create database and user, grant privileges
-echo "CREATE DATABASE IF NOT EXISTS ${MYSQL_NAME} ; \
-      CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}' ; \
-      GRANT ALL PRIVILEGES ON ${MYSQL_NAME}.* TO '${MYSQL_USER}'@'%' ; \
-      FLUSH PRIVILEGES;" > /etc/mysql/init.sql
+# Create the wordpress database
+echo "FLUSH PRIVILEGES;
+CREATE USER '$DB_USER'@'WP_HOST' IDENTIFIED BY '$DB_PASSWORD';
+CREATE DATABASE $DB_NAME;
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'WP_HOST';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
+FLUSH PRIVILEGES;" > etc/mysql/init.sql
 
-# Run the initialization script
-/usr/bin/mysqld --init-file=/etc/mysql/init.sql
+chmod 755 etc/mysql/init.sql  # Set appropriate permissions
 
-# Keep the container running
-tail -f /dev/null
+# Use mysqld for initialization (assuming it's available) what does below command do? It initializes the data directory and creates the system tables that it contains, if they do not exist.
+mysqld --initialize-file < etc/mysql/init.sql
+
+echo -e "Mariadb and wordpress database are successfully initialized."
+
+rm -rf etc/mysql/init.sql
+

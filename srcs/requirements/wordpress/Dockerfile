@@ -1,29 +1,31 @@
-FROM debian:bullseye
+# Base image
+FROM debian:buster
 
-RUN apt-get update && apt-get install -y \
+# Update and install necessary packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+    php \
     php7.4-fpm \
-    php7.4-mysql \
-    curl \
-    less \
-    default-mysql-client \
-    && rm -rf /var/lib/apt/lists/*
+    php-mysql \
+    curl
 
-RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x /usr/local/bin/wp
+# Create necessary directories and set permissions
+RUN mkdir -p /var/www/html /run/php && \
+    chown -R www-data:www-data /var/www/html /run/php && \
+    chmod -R 755 /var/www/html
 
-WORKDIR /var/www/html
-
-COPY ./conf/wp-config.php /var/www/html/wp-config.php
-COPY ./tools/setup.sh /usr/local/bin/setup.sh
+# Copy setup script and make it executable
+COPY tools/setup.sh /usr/local/bin/setup.sh
 RUN chmod +x /usr/local/bin/setup.sh
 
-RUN sed -i 's/listen = \/run\/php\/php7.4-fpm.sock/listen = 9000/g' /etc/php/7.4/fpm/pool.d/www.conf
-RUN chown -R www-data:www-data /var/www/html \
-    && chown -R www-data:www-data /var/log \
-    && chown -R www-data:www-data /etc/php/7.4/fpm \
-    && mkdir -p /run/php \
-    && chown -R www-data:www-data /run/php/
+# Install WP-CLI
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
 
-EXPOSE 9000
+# Set working directory
+WORKDIR /var/www/html
 
-CMD ["/usr/local/bin/setup.sh"]
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/setup.sh"]

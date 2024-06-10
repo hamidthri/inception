@@ -1,36 +1,42 @@
 #!/bin/bash
 
-DB_NAME="wordpress"
-DB_USER="wp_user"
-DB_PASSWORD="wp_password"
-DB_HOST="mariadb"
-WP_USER_ROLE="editor"
+# Define color codes for output
+GREEN='\033[0;32m'
+NC='\033[0m'
 
-DOMAIN_NAME="example.com"
-WP_TITLE="My WordPress Site"
-WP_ADMIN_USER="admin"
-WP_ADMIN_PASSWORD="admin"
-WP_ADMIN_EMAIL="admin@example.com"
-WP_USER="user"
-WP_PASSWORD="password"
-
-WP_PATH="/var/www/html"
-
-if [ ! -f "$WP_PATH/wp-load.php" ]; then
-  echo -e "${GREEN}Downloading WordPress core files..."
-  wp core download --path="$WP_PATH" --allow-root
+# Check if WordPress is not already installed
+if [ ! -f /var/www/html/wp-config.php ]; then
+    echo -e "${GREEN}Downloading WordPress core...${NC}"
+    wp core download --allow-root
 fi
 
-if [ ! -e "$WP_PATH/wp-config.php" ]; then
-  echo -e "${GREEN}Creating wp-config.php file..."
-  wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost="$DB_HOST" --path="$WP_PATH" --allow-root
-fi
+# Copy the sample configuration file
+echo -e "${GREEN}Copying wp-config-sample.php to wp-config.php...${NC}"
+cp wp-config-sample.php wp-config.php
 
-su - www-data -s /bin/bash <<EOF
-wp core install --url="$DOMAIN_NAME" --title="$WP_TITLE" --admin_user="$WP_ADMIN_USER" --admin_password="$WP_ADMIN_PASSWORD" --admin_email="$WP_ADMIN_EMAIL" --path="$WP_PATH"
-wp user create "$WP_USER" "$WP_ADMIN_EMAIL" --user_pass="$WP_PASSWORD" --role=$WP_USER_ROLE --path="$WP_PATH"
-EOF
+# Replace database placeholders with environment variables
+echo -e "${GREEN}Configuring wp-config.php...${NC}"
+sed -i -r "s/database_name_here/$DB_NAME/" wp-config.php
+sed -i -r "s/username_here/$DB_USER/" wp-config.php
+sed -i -r "s/password_here/$DB_PASSWORD/" wp-config.php
+sed -i -r "s/localhost/mariadb/" wp-config.php
 
-echo -e "${GREEN}WordPress setup is complete!"
+# Modify PHP-FPM configuration to use port 9000 instead of socket
+echo -e "${GREEN}Configuring PHP-FPM to listen on port 9000...${NC}"
+sed -i 's|listen = /run/php/php7.4-fpm.sock|listen = 9000|g' /etc/php/7.4/fpm/pool.d/www.conf
 
-exec "$@"
+# Wait for the database to be ready
+echo -e "${GREEN}Waiting for the database to be ready...${NC}"
+sleep 10
+
+# Install WordPress
+echo -e "${GREEN}Installing WordPress...${NC}"
+wp core install --url=$DOMAIN_NAME --title=$WP_TITLE --admin_user=$WP_ADMIN_USER --admin_password=$WP_ADMIN_PASSWORD --admin_email=$WP_ADMIN_EMAIL --allow-root
+
+# Create a new WordPress user
+echo -e "${GREEN}Creating a new WordPress user...${NC}"
+wp user create $WP_USER $WP_USER_EMAIL --user_pass=$WP_USER_PASSWORD --role=author --allow-root
+
+# Start PHP-FPM in the foreground
+echo -e "${GREEN}Starting PHP-FPM...${NC}"
+php-fpm7.4 -F

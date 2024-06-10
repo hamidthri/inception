@@ -9,11 +9,14 @@ server {
 
     index index.php;
     root /var/www/html;
+    server_name $DOMAIN_NAME;
 
-    location ~ [^/]\.php(/|$) {
+    location ~ \.php$ {
         try_files $uri =404;
         fastcgi_pass wordpress:9000;
         include fastcgi_params;
+        fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
     }
 }

@@ -1,22 +1,35 @@
 #!/bin/bash
 
-echo -e "Starting Mariadb service..."
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo "Database name: $DB_NAME"
+
+echo -e "${GREEN}Database creation in progress...${NC}"
+
+# Allow the connection from any IP address from the network
+sed -i "s/127.0.0.1/0.0.0.0/" /etc/mysql/mariadb.conf.d/50-server.cnf 
+
+# Start the MySQL service
 service mysql start
 
-# Create the wordpress database
-echo "FLUSH PRIVILEGES;
-CREATE USER '$DB_USER'@'WP_HOST' IDENTIFIED BY '$DB_PASSWORD';
-CREATE DATABASE $DB_NAME;
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'WP_HOST';
-ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
-FLUSH PRIVILEGES;" > etc/mysql/init.sql
+# Wait for MySQL to be fully up and running
+until mysqladmin ping &>/dev/null; do
+  echo -e "${GREEN}Waiting for MySQL to be up...${NC}"
+  sleep 2
+done
 
-chmod 755 etc/mysql/init.sql  # Set appropriate permissions
+mysql -u root <<EOF
+CREATE DATABASE IF NOT EXISTS ${DB_NAME};
+CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
 
-# Use mysqld for initialization (assuming it's available) what does below command do? It initializes the data directory and creates the system tables that it contains, if they do not exist.
-mysqld --initialize-file < etc/mysql/init.sql
+echo -e "${GREEN}Database creation done.${NC}"
 
-echo -e "Mariadb and wordpress database are successfully initialized."
+# Stop the service to allow the connection from any IP address from the network
+kill $(cat /run/mysqld/mysqld.pid)
 
-rm -rf etc/mysql/init.sql
-
+mysqld_safe

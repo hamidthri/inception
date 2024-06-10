@@ -1,65 +1,66 @@
 version: '3.7'
+# volumes for mariadb and wordpress
+volumes:
+  wordpress_v:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/htaheri/Documents/projects/seventh/inception/volumes/wordpress
+      o: bind
 
+  mariadb_v:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/htaheri/Documents/projects/seventh/inception/volumes/mariadb
+      o: bind
+# mariadb service for running the database
 services:
-  nginx:
-    container_name: nginx
-    image: nginx:1.25.5
-    build: ./requirements/nginx/
-    ports:
-      - "443:443"
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    build: ./requirements/mariadb/
     restart: always
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
     volumes:
-      - wordpress:/var/www/html
-    depends_on:
-      - wordpress
+      - mariadb_v:/var/lib/mysql
     networks:
       - inception
-
+# wordpress service for running the wordpress
   wordpress:
     container_name: wordpress
     image: wordpress
     build: ./requirements/wordpress/
     restart: always
-    # env_file:
-    #   - .env
-    environment:
-      WORDPRESS_DB_HOST: mariadb
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DB_USER: wp_user
-      WORDPRESS_DB_PASSWORD: wp_password
-
+    env_file:
+      - .env
+    ports:
+      - "9000:9000" 
     volumes:
-      - wordpress:/var/www/html
+      - wordpress_v:/var/www/html # mount the wordpress volume to the wordpress container
     networks:
       - inception
     depends_on:
       - mariadb
-
-  mariadb:
-    container_name: mariadb
-    image: mariadb:10.5
-    build: ./requirements/mariadb/
+# nginx service for serving the wordpress
+  nginx:
+    container_name: nginx
+    image: nginx
+    build: ./requirements/nginx/
+    ports:
+      - "443:443" # https
     restart: always
-    # env_file:
-    #   - .env
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wp_user
-      MYSQL_PASSWORD: wp_password
-
+    env_file:
+      - .env # read the environment variables from the .env file
     volumes:
-      - mariadb:/var/lib/mysql
+      - wordpress_v:/var/www/html # mount the wordpress volume to the nginx container
+    depends_on:
+      - wordpress
     networks:
       - inception
-
-
-volumes:
-  mariadb:
-  wordpress:
-  nginx:
 
 networks:
   inception:

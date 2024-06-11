@@ -6,7 +6,7 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
     php \
-    php7.4-fpm \
+    php7.3-fpm \
     php-mysql \
     curl
 

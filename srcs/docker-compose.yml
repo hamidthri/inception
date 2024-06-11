@@ -12,7 +12,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/htaheri/data
+      device: /home /htaheri/data
       o: bind
 # mariadb service for running the database
 services:

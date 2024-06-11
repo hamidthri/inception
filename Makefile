@@ -6,12 +6,12 @@
 #    By: htaheri <htaheri@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/26 15:10:50 by htaheri           #+#    #+#              #
-#    Updated: 2024/06/11 17:11:32 by htaheri          ###   ########.fr        #
+#    Updated: 2024/06/11 18:12:59 by htaheri          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
-VOLUME_DIR = /home/htaheri/data
+VOLUME_DIR = /Users/htaheri/Documents/GitHub/inception/
 
 all: build up
 

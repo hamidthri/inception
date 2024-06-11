@@ -6,20 +6,27 @@
 #    By: htaheri <htaheri@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/26 15:10:50 by htaheri           #+#    #+#              #
-#    Updated: 2024/06/11 18:21:09 by htaheri          ###   ########.fr        #
+#    Updated: 2024/06/11 19:20:58 by htaheri          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
-VOLUME_DIR = /Users/htaheri/Documents/GitHub/inception/
+VOLUME_DIR = /home/htaheri/data
 
-all: build up
+all: create_volume up
 
-build:
-	mkdir -p ${VOLUME_DIR}/mariadb
-	mkdir -p ${VOLUME_DIR}/wordpress
+create_volume:
+	@if [ ! -d ${VOLUME_DIR}/mariadb ]; then mkdir -p ${VOLUME_DIR}/mariadb; fi
+	@if [ ! -d ${VOLUME_DIR}/wordpress ]; then mkdir -p ${VOLUME_DIR}/wordpress; fi
+
+
+delete_volume:
+	@if [ -d ${VOLUME_DIR}/mariadb ]; then rm -rf ${VOLUME_DIR}/mariadb; fi
+	@if [ -d ${VOLUME_DIR}/wordpress ]; then rm -rf ${VOLUME_DIR}/wordpress; fi
+
+build: create_volume
 	${DOCKER_COMPOSE} build
-up:
+up: build 
 	${DOCKER_COMPOSE} up
 	
 down:
@@ -32,15 +39,16 @@ start:
 	${DOCKER_COMPOSE} start
 
 clean: down
-	if [ -d ${VOLUME_DIR}/mariadb ]; then rm -rf ${VOLUME_DIR}/mariadb; fi
-	if [ -d ${VOLUME_DIR}/wordpress ]; then rm -rf ${VOLUME_DIR}/wordpress; fi
-	${DOCKER_COMPOSE} down --rmi all
-	docker volume rm $$(docker volume ls -q)
-	docker system prune -f --volumes
+	docker container prune -f
+	docker network prune -f
+	docker image prune -f
+
+fclean: clean delete_volume
+	docker system prune -a -f
 
 re: clean all
 
 restart:
 	${DOCKER_COMPOSE} restart
 
-.PHONY: all build up down ps clean
+.PHONY: all create_volume delete_volume build up down stop start clean fclean re restart

@@ -27,7 +27,7 @@ sed -i 's|listen = /run/php/php7.4-fpm.sock|listen = 9000|g' /etc/php/7.4/fpm/po
 
 # Wait for the database to be ready
 echo -e "${GREEN}Waiting for the database to be ready...${NC}"
-sleep 10
+sleep 30
 
 # Install WordPress
 echo -e "${GREEN}Installing WordPress...${NC}"

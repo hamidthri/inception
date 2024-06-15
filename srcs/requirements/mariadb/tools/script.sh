@@ -3,8 +3,6 @@
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-echo "Database name: $DB_NAME"
-
 echo -e "${GREEN}Database creation in progress...${NC}"
 
 # Allow the connection from any IP address from the network
@@ -19,7 +17,7 @@ until mysqladmin ping &>/dev/null; do
   sleep 2
 done
 
-mysql -u root <<EOF
+mysql -u root -p${DB_ROOT_PASSWORD} <<EOF
 CREATE DATABASE IF NOT EXISTS ${DB_NAME};
 CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';

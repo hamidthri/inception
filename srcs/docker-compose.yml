@@ -5,14 +5,14 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/htaheri/data/wordpress
+      device: /Users/htaheri/Documents/GitHub/inception/volumes2/wordpress
       o: bind
 
   mariadb_v:
     driver: local
     driver_opts:
       type: none
-      device: /home/htaheri/data/mariadb
+      device: /Users/htaheri/Documents/GitHub/inception/volumes2/mariadb
       o: bind
 # mariadb service for running the database
 services:

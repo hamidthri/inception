@@ -6,41 +6,44 @@
 #    By: htaheri <htaheri@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/26 15:10:50 by htaheri           #+#    #+#              #
-#    Updated: 2024/06/15 16:27:36 by htaheri          ###   ########.fr        #
+#    Updated: 2024/06/16 15:17:14 by htaheri          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
-VOLUME_DIR = /Users/htaheri/Documents/GitHub/inception/volumes2
+VOLUME_DIR = /Users/htaheri/Documents/GitHub/inception3/volumes
 
-all: create_volume up
+all: up
 
-create_volume:
-	@mkdir -p ${VOLUME_DIR}/mariadb ${VOLUME_DIR}/wordpress
+# Target to create necessary directories
+create_dirs:
+	mkdir -p ${VOLUME_DIR}/mariadb
+	mkdir -p ${VOLUME_DIR}/wordpress
 
-delete_volume:
-	${DOCKER_COMPOSE} down --volumes --remove-orphans
-
-build: create_volume
+build: create_dirs
 	${DOCKER_COMPOSE} build
 
-up: build 
+up: build
 	${DOCKER_COMPOSE} up
 
 down:
 	${DOCKER_COMPOSE} down
 
-clean:
-	docker container prune -f
-	docker network prune -f
-	docker image prune -f
+stop:
+	${DOCKER_COMPOSE} stop
 
-fclean: clean delete_volume
-	docker system prune -f -a
-	docker system prune -a --volumes
+start:
+	${DOCKER_COMPOSE} start
+
+clean:
+	docker rm -f mariadb wordpress nginx
+	docker rmi -f mariadb wordpress nginx
+	docker volume rm $(shell docker volume ls -q)
+	docker system prune -a -f
 
 re: clean all
 
-.PHONY: all create_volume delete_volume build up down clean fclean re
+restart:
+	${DOCKER_COMPOSE} restart
 
-
+.PHONY: all build up down stop start clean re restart create-dirs

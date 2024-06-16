@@ -1,20 +1,19 @@
 version: '3.7'
-# volumes for mariadb and wordpress
+
 volumes:
   wordpress_v:
     driver: local
     driver_opts:
       type: none
-      device: /Users/htaheri/Documents/GitHub/inception/volumes2/wordpress
+      device: /Users/htaheri/Documents/GitHub/inception3/volumes/wordpress
       o: bind
-
   mariadb_v:
     driver: local
     driver_opts:
       type: none
-      device: /Users/htaheri/Documents/GitHub/inception/volumes2/mariadb
+      device: /Users/htaheri/Documents/GitHub/inception3/volumes/mariadb
       o: bind
-# mariadb service for running the database
+
 services:
   mariadb:
     container_name: mariadb
@@ -29,7 +28,7 @@ services:
       - mariadb_v:/var/lib/mysql
     networks:
       - inception
-# wordpress service for running the wordpress
+
   wordpress:
     container_name: wordpress
     image: wordpress
@@ -38,25 +37,25 @@ services:
     env_file:
       - .env
     ports:
-      - "9000:9000" 
+      - "9000:9000"
     volumes:
-      - wordpress_v:/var/www/html # mount the wordpress volume to the wordpress container
+      - wordpress_v:/var/www/html
     networks:
       - inception
     depends_on:
       - mariadb
-# nginx service for serving the wordpress
+
   nginx:
     container_name: nginx
     image: nginx
     build: ./requirements/nginx/
     ports:
-      - "443:443" # https
+      - "443:443"
     restart: always
     env_file:
-      - .env # read the environment variables from the .env file
+      - .env
     volumes:
-      - wordpress_v:/var/www/html # mount the wordpress volume to the nginx container
+      - wordpress_v:/var/www/html
     depends_on:
       - wordpress
     networks:

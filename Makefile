@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml
-VOLUME_DIR = /Users/htaheri/Documents/GitHub/inception3/volumes
+VOLUME_DIR = /home/htaheri/data
 
 all: up
 

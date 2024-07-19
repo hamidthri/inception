@@ -8,8 +8,6 @@ This project aims to introduce you to system administration by working with Dock
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
 - [Acknowledgements](#acknowledgements)
 
 ## Project Overview
@@ -68,14 +66,8 @@ Before you begin, ensure you have the following installed:
 - `Dockerfile`: Instructions to build individual Docker images.
 - `src/`: Source code for your application.
 
-## Contributing
-Contributions are welcome! Please fork the repository and create a pull request with your changes. Ensure your code follows the project's coding standards and includes appropriate tests.
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
-- [42 School](https://www.42.us.org/)
 - [Docker Documentation](https://docs.docker.com/)
 
 Feel free to reach out if you have any questions or need further assistance. Happy coding!

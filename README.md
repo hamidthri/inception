@@ -1,6 +1,6 @@
-# Inception - 42 School Project
+# Inception
 
-Welcome to the Inception project, part of the 42 school's curriculum. This project aims to introduce you to system administration by working with Docker. You'll gain hands-on experience with containerization and deploying applications in a multi-container environment.
+This project aims to introduce you to system administration by working with Docker. You'll gain hands-on experience with containerization and deploying applications in a multi-container environment.
 
 ## Table of Contents
 - [Project Overview](#project-overview)
